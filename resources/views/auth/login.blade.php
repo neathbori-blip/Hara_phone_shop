@@ -69,7 +69,7 @@
                                                 <label class="form-label" for="password">Password</label>
                                                 @if (Route::has('password.request'))
                                                     <a class="btn btn-link d-none" href="{{ route('password.request') }}">
-                                                        <small>{{ __('Forgot Your Password?') }}</small>
+                                                        <small>{{ __('Forgot Your Password?') a}}</small>
                                                     </a>
                                                 @endif
                                             </div>
