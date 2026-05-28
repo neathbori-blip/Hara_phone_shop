@@ -121,4 +121,57 @@ class OrderController extends Controller
       $type = $request->type ?? 'download';
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
     }
+
+
+   public function create(string $lang)
+{
+    $customers = Customer::all();
+    $products = Product::available()->with('brand', 'series', 'color', 'storage')->get();
+    return view('orders.create', compact('customers', 'products'));
+}
+
+public function store(Request $request, string $lang)
+{
+    $request->validate([
+        'customer_id'  => 'required|exists:customers,id',
+        'productIds'   => 'required|array|min:1',
+        'productIds.*' => 'exists:products,id',
+        'payment_type' => 'required|in:1,2,3',
+        'payment_status' => 'required|in:1,2',
+        'note'         => 'nullable|string',
+    ]);
+
+    $total = 0;
+    foreach ($request->productIds as $productId) {
+        $product = Product::available()->findOrFail($productId);
+        $total += $product->selling_price;
+    }
+
+    $order = Order::create([
+        'customer_id'    => $request->customer_id,
+        'employee_id'    => Auth::id(),
+        'status'         => Order::STATUS_ACTIVE,
+        'total_amount'   => $total,
+        'payment_status' => $request->payment_status,
+        'payment_type'   => $request->payment_type,
+        'note'           => $request->note,
+        'order_date'     => Carbon::now(),
+    ]);
+
+    foreach ($request->productIds as $productId) {
+        $product = Product::available()->findOrFail($productId);
+
+        OrderDetail::create([
+            'order_id'   => $order->id,
+            'product_id' => $product->id,
+            'unit_price' => $product->selling_price,
+        ]);
+
+        // Mark product as sold
+        $product->update(['status' => Product::STATUS_ID_SOLD]);
+    }
+
+    return redirect()->route('sales.index', withLang())
+        ->with('success', 'Order created successfully');
+}
 }
