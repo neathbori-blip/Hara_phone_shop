@@ -32,7 +32,8 @@ class OrderController extends Controller
    */
   public function index(Request $request)
   {
-    
+    $query = Oder::query(); //add
+    $customers = Customer::all();//add
     $parameterNames = [];
     if ($request->search) {
         $filters = $request->only(['customer', 'from_date', 'to_date']);
