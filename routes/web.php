@@ -75,15 +75,24 @@ Route::group([
         Route::get('/profile/edit/password', [UserController::class, 'editPassword'])->name('edit.profile.password');
         Route::post('/profile/update/password', [UserController::class, 'updatePassword'])->name('update.profile.password');
     });
-    Route::group(['prefix'=>'order','as'=>'orders.'], function(){
-    Route::get('/create', [OrderController::class, 'create'])->name('create');
-    Route::get('/', [OrderController::class, 'index'])->name('index');
-    });
-    Route::group(['prefix'=>'sale','as'=>'sales.'], function(){
-      Route::get('/create', [OrderController::class, 'create'])->name('create');
-      Route::get('/', [OrderController::class, 'index'])->name('index');
-     
-    });
+    
+    Route::group(['prefix' => 'order', 'as' => 'orders.'], function () {
+    Route::get('/',           [OrderController::class, 'index'])->name('index');
+    Route::get('/create',     [OrderController::class, 'create'])->name('create');
+    Route::post('/store',     [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',    [OrderController::class, 'show'])->name('show');
+    Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+});
+
+
+Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
+    Route::get('/',                [OrderController::class, 'index'])->name('index');    // → sales.index
+    Route::get('/create',          [OrderController::class, 'create'])->name('create');  // → sales.create
+    Route::post('/',               [OrderController::class, 'store'])->name('store');    // → sales.store
+    Route::get('/{order}',         [OrderController::class, 'show'])->name('show');      // → sales.show
+    Route::delete('/{order}',      [OrderController::class, 'destroy'])->name('destroy');// → sales.destroy
+});
+
     Route::group(['prefix'=>'cart','as'=>'carts.'], function(){
       Route::post('/store', [CartController::class, 'store'])->name('store');
       Route::delete('/destroy', [CartController::class, 'destroy'])->name('destroy');

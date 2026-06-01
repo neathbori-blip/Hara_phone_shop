@@ -33,7 +33,10 @@ class OrderController extends Controller
   public function index(Request $request)
   {
     
+    $query = Order::query();
+    $customers = Customer::all();
     $parameterNames = [];
+
     if ($request->search) {
         $filters = $request->only(['customer', 'from_date', 'to_date']);
 
@@ -120,5 +123,26 @@ class OrderController extends Controller
       $file_pdf = 'invoice-'.str_pad($order->id, 5, '0', STR_PAD_LEFT).'.pdf';
       $type = $request->type ?? 'download';
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
+    }
+
+
+
+
+    public function create()
+    {
+
+    $customers = Customer::all();
+    $products  = Product::available()->get();
+    $brands = Brand::all();
+     $nextOrderId = (Order::max('id') ?? 0) + 1;
+
+    return view('orders.create', compact(
+        'customers',
+        'products',
+        'brands',
+        'nextOrderId',
+        
+    ));
+        
     }
 }
