@@ -198,6 +198,7 @@ Route::group([
       Route::get('/', [CustomerController::class, 'index'])->name('index');
       Route::get('/edit/{id}', [CustomerController::class, 'edit'])->name('edit');
       Route::get('/create', [CustomerController::class, 'create'])->name('create');
+      Route::post('/store', [CustomerController::class, 'store'])->name('store');
       Route::get('/show/{id}', [CustomerController::class, 'show'])->name('show');
       Route::post('/store', [CustomerController::class, 'store'])->name('store');
       Route::post('/update/{id}', [CustomerController::class, 'update'])->name('update');

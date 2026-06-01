@@ -35,7 +35,7 @@
 
 
     @if($view == 'gride')
-        <h6>ផលិតផលក្នុងស្តុកសរុប :  {{$totalProductAvailable}} (លក់ចេញ:{{$totalProductSold}}) </h6>
+        <h6>ផលិតផលក្នុងស្តុកសរុប : <span id="count-available">{{$totalProductAvailable}}</span> (លក់ចេញ:<span id="count-sold">{{$totalProductSold}}</span>)</h6>
         <!-- Gride Product  -->
         <div class="row row-cols-1 row-cols-md-4 g-4 mb-5">
           @foreach ($products as $key => $product)
@@ -46,7 +46,6 @@
                   <h5 class="card-title"><strong>{{ $product->product_name ?? ''}}</strong> </h5>
                   <p class="card-text">
                     <small class="mx-2">{!! $product->condition_label_badges_name ?? ''!!}</small><small>{!! $product->status_badges_name ?? ''!!}</small>
-                  <!-- <h4 class="mb-1 text-danger text-end"><small class="text-muted"></small>$ {{ $product->selling_price ?? ''}} </h4> -->
                   <h4 class="mb-1 text-danger text-end"><small class="text-muted"></small>{{ setToStringDolla($product->selling_price ?? 0)}} </h4>
                   <h6 class="mb-1"><small class="text-muted">{{__('product.imei')}} :</small> {{ $product->product_imei ?? ''}} </h6>
                   <h6 class="mb-1"><small class="text-muted">{{__('product.series')}} :</small> {{ $product->series->name ?? ''}} </h6>
@@ -95,7 +94,7 @@
         <div class="card">
           <div class="card-header"> 
             <h5>{{ __('product.list_title')}}</h5> 
-            <h6>ផលិតផលក្នុងស្តុកសរុប : ក្នុងស្តុក {{$totalProductAvailable}} (លក់ចេញ:{{$totalProductSold}})</h6>
+            <h6>ផលិតផលក្នុងស្តុកសរុប : ក្នុងស្តុក <span id="count-available">{{$totalProductAvailable}}</span> (លក់ចេញ:<span id="count-sold">{{$totalProductSold}}</span>)</h6>
           </div>
           <div class="table-responsive text-nowrap">
               <table class="table">
@@ -162,13 +161,13 @@
                                     @endif
                                   @endcan
 
-                                    <form method="POST" action="{{ route('products.destroy', withLang(['product' => $product->id])) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-icon btn-outline-danger" onclick="return confirm('Are you sure you want to delete this product?')">
-                                            <span class="tf-icons bx bx-trash"></span>
-                                        </button>
-                                    </form>
+                                  <form method="POST" action="{{ route('products.destroy', withLang(['product' => $product->id])) }}" class="d-inline delete-form">
+                                      @csrf
+                                      @method('DELETE')
+                                      <button type="button" class="btn btn-icon btn-outline-danger btn-delete">
+                                          <span class="tf-icons bx bx-trash"></span>
+                                      </button>
+                                  </form>
 
                               </td>
                           </tr>
@@ -309,36 +308,76 @@
 @endsection
 @push('script')
     <script>
+      var countRefreshUrl = '{{ route("products.index", app()->getLocale()) }}';
+
+      // Refresh counts every 30 seconds
+      function refreshCounts() {
+          $.ajax({
+              type: 'GET',
+              url: countRefreshUrl,
+              data: { count_only: true },
+              dataType: 'json',
+              success: function(data) {
+                  $('#count-available').text(data.available);
+                  $('#count-sold').text(data.sold);
+              }
+          });
+      }
+
+      setInterval(refreshCounts, 30000);
+
       $(document).ready(function() {
-       $('#brand').change(function() {
-            var brandID = $(this).val();
-            $('#series').prop("disabled", false);
-            if (brandID !== '') {
-                $.ajax({
-                    type: 'GET',
-                    url: '/en/series/brand/' + brandID,
-                    dataType: 'json',
-                    success: function(data) {
-                        // Clear and populate select2 with new data
-                        var series = $('#series');
-                        series.empty();
-                        series.append('<option>Select an option</option>');
-                        if (data.length > 0) {
-                            $.each(data, function(key, value) {
-                                series.append('<option value="' + value.id + '">' + value.name + '</option>');
-                            });
-                        }
-                    }
-                });
-            } else {
-                // Reset select2 when nothing is selected in select1
-                $('#series').empty().append('<option value="">Select an option</option>');
-                $('#series').prop("disabled", true);
-            }
-        });
+
+          // Delete with count refresh
+          $(document).on('click', '.btn-delete', function() {
+              if (!confirm('Are you sure you want to delete this product?')) return;
+              var form = $(this).closest('.delete-form');
+              $.ajax({
+                  type: 'POST',
+                  url: form.attr('action'),
+                  data: form.serialize(),
+                  success: function() {
+                      // Remove the table row
+                      form.closest('tr').fadeOut(300, function() { $(this).remove(); });
+                      // Refresh counts immediately
+                      refreshCounts();
+                  },
+                  error: function() {
+                      alert('Something went wrong. Please try again.');
+                  }
+              });
+          });
+
+          // Brand change -> load series
+          $('#brand').change(function() {
+              var brandID = $(this).val();
+              $('#series').prop("disabled", false);
+              if (brandID !== '') {
+                  $.ajax({
+                      type: 'GET',
+                      url: '/en/series/brand/' + brandID,
+                      dataType: 'json',
+                      success: function(data) {
+                          var series = $('#series');
+                          series.empty();
+                          series.append('<option>Select an option</option>');
+                          if (data.length > 0) {
+                              $.each(data, function(key, value) {
+                                  series.append('<option value="' + value.id + '">' + value.name + '</option>');
+                              });
+                          }
+                      }
+                  });
+              } else {
+                  $('#series').empty().append('<option value="">Select an option</option>');
+                  $('#series').prop("disabled", true);
+              }
+          });
+
       });
-        function submitForm(){
-            $('.submit-delete').click();
-        }
+
+      function submitForm(){
+          $('.submit-delete').click();
+      }
     </script>
 @endpush

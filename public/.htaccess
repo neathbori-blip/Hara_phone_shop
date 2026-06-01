@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+
+    # ADD THESE 2 LINES:
+    php_value upload_max_filesize 20M
+    php_value post_max_size 20M
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
