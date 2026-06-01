@@ -22,7 +22,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\NetworkController;
-
+use App\Http\Controllers\GuarantorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -43,7 +43,7 @@ Route::group([
   'where' => ['lang' => 'kh|en'],
   'middleware' => [ 'auth' , 'language' ]], function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
-
+Route::resource('guarantors', GuarantorController::class);
     //Report Route
     Route::group(['prefix'=>'report','as'=>'reports.'], function(){
       Route::get('/stock', [ReportController::class, 'stock'])->name('stock');

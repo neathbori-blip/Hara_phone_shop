@@ -27,13 +27,20 @@ class OrderController extends Controller
       $this->middleware('permission:order-edit', ['only' => ['edit','update']]);
       $this->middleware('permission:order-delete', ['only' => ['destroy']]);
   }
+
   /**
    * Display a listing of the resource.
    */
   public function index(Request $request)
   {
+    // FIXED: Initialize $query variable
+    $query = Order::query();
     
     $parameterNames = [];
+    
+    // FIXED: Get customers for the view
+    $customers = Customer::all();
+    
     if ($request->search) {
         $filters = $request->only(['customer', 'from_date', 'to_date']);
 
@@ -60,6 +67,7 @@ class OrderController extends Controller
 
     $orders = $query->orderBy('order_date', 'desc')->paginate(20);
     session(['printInvoiceId' => null]);
+    
     return view('orders.index', compact(
       'orders',
       'customers',
@@ -67,58 +75,156 @@ class OrderController extends Controller
     ));
   }
 
-     /**
-     * Display the specified resource.
-     */
-    public function show(string $lang, Order $order)
-    {
-        $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
-        $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
-        return view('orders.show', compact('order', 'order_detals'));
+  /**
+   * Show the form for creating a new resource.
+   */
+  public function create()
+  {
+    // FIXED: Pass customers and products to the view
+    $customers = Customer::all();
+    $products = Product::available()->get();
+    
+    return view('orders.create', compact('customers', 'products'));
+  }
+
+  /**
+   * Store a newly created resource in storage.
+   */
+  public function store(Request $request, string $lang)
+  {
+    // FIXED: Added the store method
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+        'products' => 'required|array|min:1',
+        'products.*.id' => 'required|exists:products,id',
+        'products.*.quantity' => 'required|integer|min:1',
+    ]);
+
+    // Create order
+    $order = Order::create([
+        'customer_id' => $request->customer_id,
+        'employee_id' => Auth::id(),
+        'order_date' => $request->order_date,
+        'total_amount' => 0,
+    ]);
+
+    $totalAmount = 0;
+
+    // Create order details
+    foreach ($request->products as $product) {
+        $productModel = Product::find($product['id']);
+        $subtotal = $productModel->price * $product['quantity'];
+        $totalAmount += $subtotal;
+
+        OrderDetail::create([
+            'order_id' => $order->id,
+            'product_id' => $product['id'],
+            'quantity' => $product['quantity'],
+            'price' => $productModel->price,
+            'total' => $subtotal,
+        ]);
     }
 
+    // Update order total
+    $order->update(['total_amount' => $totalAmount]);
 
-    /**
-     * * Display the specified resource.
-     * */
-    public function checkProductOrder(Request $request)
-    {
-        // Attach order details to the order
-        foreach ($request->productIds as $key => $productId) {
+    return redirect()->route('sales.index', $lang)->with('success', 'Order created successfully');
+  }
 
-            // Check if the product is available
-            $product = Product::available()->find($productId);
-            if (!$product) {
-                return response()->json(['message' => 'Product not found.'], 404);
-            }
+  /**
+   * Display the specified resource.
+   */
+  public function show(string $lang, Order $order)
+  {
+    $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
+    $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+    return view('orders.show', compact('order', 'order_detals'));
+  }
+
+  /**
+   * Show the form for editing the specified resource.
+   */
+  public function edit(string $lang, Order $order)
+  {
+    // Add this method if needed for editing orders
+    $customers = Customer::all();
+    $products = Product::available()->get();
+    $order->load('orderDetails');
+    
+    return view('orders.edit', compact('order', 'customers', 'products'));
+  }
+
+  /**
+   * Update the specified resource in storage.
+   */
+  public function update(Request $request, string $lang, Order $order)
+  {
+    // Add this method if needed for updating orders
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date' => 'required|date',
+    ]);
+
+    $order->update([
+        'customer_id' => $request->customer_id,
+        'order_date' => $request->order_date,
+    ]);
+
+    return redirect()->route('sales.index', $lang)->with('success', 'Order updated successfully');
+  }
+
+  /**
+   * Remove the specified resource from storage.
+   */
+  public function destroy(string $lang, Order $order)
+  {
+    // FIXED: Delete order details first, then the order
+    $orderDetials = OrderDetail::where('order_id', $order->id)->get();
+    foreach ($orderDetials as $detail) {
+        $detail->delete();
+    }
+    $order->delete();
+
+    return redirect()->route('sales.index', $lang)->with('success', 'Sale deleted successfully');
+  }
+
+  /**
+   * * Display the specified resource.
+   * */
+  public function checkProductOrder(Request $request)
+  {
+    // Attach order details to the order
+    foreach ($request->productIds as $key => $productId) {
+        // Check if the product is available
+        $product = Product::available()->find($productId);
+        if (!$product) {
+            return response()->json(['message' => 'Product not found.'], 404);
         }
-        return response()->json(['message' => 'Submiting Order'], 201);
     }
+    return response()->json(['message' => 'Submiting Order'], 201);
+  }
 
-    public function destroy(string $lang, Order $order)
-    {
-        $orderDetial = OrderDetail::where('order_id', $order->id)->get();
+  /**
+   * Display the invoice.
+   */
+  public function invoice(string $lang, Order $order)
+  {
+    $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
+    $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+    return view('orders.invoice', compact('order', 'order_detals'));
+  }
 
-      return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
-    }
-
-     /**
-     * Display the specified resource.
-     */
-    public function invoice(string $lang, Order $order)
-    {
-        $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
-        $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
-        return view('orders.invoice', compact('order', 'order_detals'));
-    }
-
-    public function invoicePdf(Request $request, string $lang, Order $order)
-    {
-      $currentDate = Carbon::now()->format('Y-m-d');
-      $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
-      $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
-      $file_pdf = 'invoice-'.str_pad($order->id, 5, '0', STR_PAD_LEFT).'.pdf';
-      $type = $request->type ?? 'download';
-      return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
-    }
+  /**
+   * Generate PDF invoice.
+   */
+  public function invoicePdf(Request $request, string $lang, Order $order)
+  {
+    $currentDate = Carbon::now()->format('Y-m-d');
+    $order = $order->with('orderDetails', 'customer', 'employee')->findOrfail($order->id);
+    $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+    $file_pdf = 'invoice-'.str_pad($order->id, 5, '0', STR_PAD_LEFT).'.pdf';
+    $type = $request->type ?? 'download';
+    return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
+  }
 }
