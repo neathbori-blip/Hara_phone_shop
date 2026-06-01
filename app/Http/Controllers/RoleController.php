@@ -47,8 +47,13 @@ class RoleController extends Controller
      */
     public function create(): View
     {
-        $permission = Permission::get();
-        return view('roles.create',compact('permission'));
+    $permission = Permission::get();
+
+    $groupedPermissions = $permission->groupBy(function($item) {
+        return explode('-', $item->name)[0];
+    });
+
+    return view('roles.create', compact('groupedPermissions'));
     }
 
     /**
