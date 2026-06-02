@@ -44,6 +44,27 @@ Route::group([
   'middleware' => [ 'auth' , 'language' ]], function () {
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
     //Report Route
     Route::group(['prefix'=>'report','as'=>'reports.'], function(){
       Route::get('/stock', [ReportController::class, 'stock'])->name('stock');
@@ -84,13 +105,12 @@ Route::group([
     Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
 });
 
-
-Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
-    Route::get('/',                [OrderController::class, 'index'])->name('index');    // → sales.index
-    Route::get('/create',          [OrderController::class, 'create'])->name('create');  // → sales.create
-    Route::post('/',               [OrderController::class, 'store'])->name('store');    // → sales.store
-    Route::get('/{order}',         [OrderController::class, 'show'])->name('show');      // → sales.show
-    Route::delete('/{order}',      [OrderController::class, 'destroy'])->name('destroy');// → sales.destroy
+    Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
+    Route::get('/',           [OrderController::class, 'index'])->name('index');
+    Route::get('/create',     [OrderController::class, 'saleCreate'])->name('create'); // ← saleCreate
+    Route::post('/',          [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',    [OrderController::class, 'show'])->name('show');
+    Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
 });
 
     Route::group(['prefix'=>'cart','as'=>'carts.'], function(){

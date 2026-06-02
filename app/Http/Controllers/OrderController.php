@@ -142,7 +142,18 @@ class OrderController extends Controller
         'brands',
         'nextOrderId',
         
-    ));
-        
+    )); 
     }
+
+
+    public function saleCreate()
+{
+    $customers   = Customer::all();
+    $products    = Product::available()->get();
+    $nextOrderId = (Order::max('id') ?? 0) + 1;
+
+    return view('sales.create', compact(
+        'customers', 'products', 'nextOrderId'
+    ));
+}
 }

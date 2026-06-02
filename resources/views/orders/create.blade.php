@@ -153,7 +153,10 @@
     opacity: 0;
     transition: opacity 0.18s;
   }
-  .product-card:hover .product-overlay { opacity: 1; }
+  .product-card:hcontent: center;
+    color: #ccc;
+    font-size: 12px;
+    text-align:over .product-overlay { opacity: 1; }
   .product-card.in-cart .product-overlay { opacity: 1; background: rgba(105,108,255,0.25); }
   .overlay-add-btn {
     background: #696cff;
