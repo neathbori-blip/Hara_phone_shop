@@ -25,10 +25,6 @@
     <h4 class="text-lg font-bold text-gray-800 mb-0">
       {{ __('order.create_sale') ?? 'Register Sale' }}
     </h4>
-    <a href="{{ route('sales.index', withLang()) }}"
-       class="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition no-underline">
-      <i class='bx bx-arrow-back'></i> {{ __('button.back') ?? 'Back' }}
-    </a>
   </div>
 
   <form id="orderForm" action="{{ route('sales.store', withLang()) }}" method="POST">
