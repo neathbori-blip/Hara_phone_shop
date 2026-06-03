@@ -125,7 +125,41 @@ class OrderController extends Controller
       return view('orders.invoice-pdf', compact('order', 'order_detals', 'currentDate' ,'file_pdf', 'type'));
     }
 
+    public function store(Request $request)
+{
+    $request->validate([
+        'customer_id' => 'required|exists:customers,id',
+        'order_date'  => 'required|date',
+        'productIds'  => 'required|array|min:1',
+        'productIds.*'=> 'exists:products,id',
+    ]);
 
+    $order = Order::create([
+        'customer_id' => $request->customer_id,
+        'employee_id' => Auth::id(),
+        'order_date'  => $request->order_date,
+        'total_price' => 0,
+    ]);
+
+    $total = 0;
+
+    foreach ($request->productIds as $productId) {
+        $product = Product::available()->findOrFail($productId);
+
+        OrderDetail::create([
+            'order_id'   => $order->id,
+            'product_id' => $product->id,
+            'price'      => $product->selling_price,
+        ]);
+
+        $total += $product->selling_price;
+    }
+
+    $order->update(['total_price' => $total]);
+
+    return redirect()->route('sales.index', withLang())
+        ->with('success', 'Order created successfully.');
+}
 
 
     public function create()

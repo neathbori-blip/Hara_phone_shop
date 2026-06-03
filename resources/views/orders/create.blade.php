@@ -163,6 +163,7 @@
     <form id="orderForm" action="{{ route('sales.store', withLang()) }}" method="POST"
           style="display:flex; flex-direction:column; height:100%;">
       @csrf
+      <input type="hidden" name="order_date" id="orderDate">
 
       <div style="display:flex; flex-direction:column; height:100%; padding:14px 14px 0;">
 
@@ -232,6 +233,7 @@
 @push('script')
 <script>
   let cart = [];
+  document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
 
   // ── Toggle search bar
   document.getElementById('toggleSearch').addEventListener('click', function () {
