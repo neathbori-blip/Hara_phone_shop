@@ -146,16 +146,15 @@ class OrderController extends Controller
     foreach ($request->productIds as $productId) {
         $product = Product::available()->findOrFail($productId);
 
-        OrderDetail::create([
+            OrderDetail::create([
             'order_id'   => $order->id,
             'product_id' => $product->id,
-            'price'      => $product->selling_price,
+            'unit_price' => $product->selling_price,  // ← changed from 'price'
         ]);
-
         $total += $product->selling_price;
     }
 
-    $order->update(['total_price' => $total]);
+    $order->update(['total_amount' => $total]);
 
     return redirect()->route('sales.index', withLang())
         ->with('success', 'Order created successfully.');
