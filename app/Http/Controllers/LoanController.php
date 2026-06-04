@@ -24,21 +24,36 @@ class LoanController extends Controller
         $this->middleware('permission:loan-edit', ['only' => ['edit','update']]);
         $this->middleware('permission:loan-delete', ['only' => ['destroy']]);
     }
-    /**
-     * Display a listing of the loans.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index(Request $request)
     {
-        $query = Loan::query();
+        $query = Loan::with(['customer', 'product']);
+
+        if ($request->search_loan) {
+            $query->whereHas('customer', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search_loan . '%');
+            });
+        }
+
+        if ($request->customer) {
+            $query->where('customer_id', $request->customer);
+        }
+
+        if ($request->from_date) {
+            $query->whereDate('date', '>=', $request->from_date);
+        }
+
+        if ($request->to_date) {
+            $query->whereDate('date', '<=', $request->to_date);
+        }
+
+        $loans = $query->latest()->paginate(15);
+        $customers = Customer::pluck('name', 'id');
+        $parameterNames = $request->all();
+
+        return view('loans.index', compact('loans', 'customers', 'parameterNames'));
     }
 
-    /**
-     * Show the form for creating a new loan.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
       $currentNow = Carbon::now();
@@ -51,12 +66,6 @@ class LoanController extends Controller
       return view('loans.create', compact('currentDate', 'customers', 'availableProducts', 'statusOptions', 'defaultNote'));
     }
 
-    /**
-     * Store a newly created loan in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $employeeId = Auth::user()->id;
@@ -105,29 +114,21 @@ class LoanController extends Controller
         $data['phone_profit'] = $phoneProfit;
         $loan->update($data);
         if ($file = $request->file('file')) {
-          $zipFileName = $this->uploadFileZip($loan, $file );
+          $zipFileName = $this->uploadFileZip($loan, $file);
           $loan->file = $zipFileName;
           $loan->save();
         }
         $loan->product->update(['status' => Product::STATUS_ID_SOLD]);
-        $loan->document()->create(
-          $loanDocumentData
-        );
+        $loan->document()->create($loanDocumentData);
 
         return redirect()->route('loans.invoice', withLang(['loan' => $loan->id]))->with('success', 'Loan created successfully');
     }
 
-    /**
-     * Show the form for editing the specified loan.
-     *
-     * @param  \App\Models\Loan  $loan
-     * @return \Illuminate\Http\Response
-     */
     public function edit(string $lang, Loan $loan)
     {
       $customers = Customer::all();
       $availableProducts = Product::available()->get();
-      $statusOptions = Loan::STATUS;;
+      $statusOptions = Loan::STATUS;
 
       $currentNow = now();
       $currentDate = $currentNow->format('Y-m-d');
@@ -136,13 +137,6 @@ class LoanController extends Controller
       return view('loans.edit', compact('loan', 'customers', 'availableProducts', 'statusOptions', 'currentDate', 'amountUpdate'));
     }
 
-    /**
-     * Update the specified loan in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Loan  $loan
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, string $lang, Loan $loan)
     {
         $data = $request->validate([
@@ -180,16 +174,12 @@ class LoanController extends Controller
       $data['remain'] = $request->payable_amount;
       $data['interest_remain'] = $request->duration * $request->amount_interest;
       $loan->update($data);
+      $loan->document()->update($loanDocumentData);
 
-      $loan->document()->update(
-        $loanDocumentData
-      );
-
-      // Create or update the LoanDetail model
       $loanDetail = $loan->loanDetail()->create([
           'product_id' => $data['product_id'],
           'customer_id' => $data['customer_id'],
-          'employee_id' => auth()->user()->id, // Assuming you want to associate the current user as the employee
+          'employee_id' => auth()->user()->id,
           'status' => $data['status'],
           'amount' => $data['amount'],
           'first_amount' => $data['first_amount'],
@@ -201,27 +191,18 @@ class LoanController extends Controller
         return redirect()->route('loans.index', withLang())->with('success', 'Loan updated successfully');
     }
 
-    /**
-     * Remove the specified loan from storage.
-     *
-     * @param  \App\Models\Loan  $loan
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(string $lang, Loan $loan)
     {
-      // Delete related loan details
       $loan->loanDetails->each(function ($loanDetail) {
         $loanDetail->delete();
       });
 
       $loan->product->update(['status' => PRODUCT::STATUS_ID_AVAILABLE]);
 
-      // Delete related payments
       $loan->payments->each(function ($payment) {
         $payment->delete();
       });
 
-      // Delete the loan itself
       $loan->delete();
 
       return redirect()->route('loans.index', withLang())->with('success', 'Loan deleted successfully');
@@ -238,7 +219,7 @@ class LoanController extends Controller
       return view('loans.payments.list', compact('loan', 'customers', 'availableProducts', 'statusOptions', 'currentDate', 'payments'));
     }
 
-    public function pdf(Request $request,string $lang, Loan $loan)
+    public function pdf(Request $request, string $lang, Loan $loan)
     {
         $payments = LoanPayment::where('loan_id', $loan->id)->get();
         $customers = Customer::all();
@@ -263,7 +244,7 @@ class LoanController extends Controller
       return view('loans.invoice', compact('loan', 'customers', 'availableProducts', 'statusOptions', 'currentDate', 'payments'));
     }
 
-    public function invoicePdf(Request $request,string $lang, Loan $loan)
+    public function invoicePdf(Request $request, string $lang, Loan $loan)
     {
         $payments = LoanPayment::where('loan_id', $loan->id)->get();
         $customers = Customer::all();
@@ -276,15 +257,14 @@ class LoanController extends Controller
 
         return view('loans.invoice-pdf', compact('loan', 'customers', 'availableProducts', 'statusOptions', 'currentDate', 'payments', 'file_pdf', 'type'));
     }
+
     public function uploadFileZip($loan, $file)
     {
         $originalName = $file->getClientOriginalName();
         $password = '1234';
-         // Create a temporary directory to extract the contents of the ZIP file
-         $tempDirectory = storage_path('app/temp_zip_extraction');
-         Storage::makeDirectory($tempDirectory);
-         $file->move($tempDirectory, $originalName);
-         // Create a new ZIP archive
+        $tempDirectory = storage_path('app/temp_zip_extraction');
+        Storage::makeDirectory($tempDirectory);
+        $file->move($tempDirectory, $originalName);
         $zip = new ZipArchive();
         $formattedNumber = str_pad($loan->id, 5, '0', STR_PAD_LEFT);
         $zipFileName = 'files/loan/'.$formattedNumber. "_" .md5(time()) . '.zip';
@@ -294,14 +274,12 @@ class LoanController extends Controller
             foreach ($files as $file) {
                 $zip->addFile(storage_path('app/' . $file), basename($file));
             }
-
             $zip->setPassword($password);
             $zip->close();
             Storage::deleteDirectory('temp_zip_extraction');
             return $zipFileName;
         } else {
             Storage::deleteDirectory('temp_zip_extraction');
-
             return response()->json(['error' => 'Failed to create ZIP file'], 500);
         }
     }
