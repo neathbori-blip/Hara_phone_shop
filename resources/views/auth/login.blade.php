@@ -87,6 +87,8 @@
                                         <div class="mb-3">
                                             <button class="btn btn-primary d-grid w-100" type="submit"> {{ __('Login') }}</button>
                                         </div>
+
+                                        ​​<span>abcd123456</span>
                                     </form>
                                 </div>
                             </div>
