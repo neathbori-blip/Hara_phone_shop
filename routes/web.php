@@ -110,6 +110,7 @@ Route::group([
         Route::get('/create', [ModelTypeController::class, 'create'])->name('create');
         Route::post('/store', [ModelTypeController::class, 'store'])->name('store');
         Route::post('/update', [ModelTypeController::class, 'update'])->name('update');
+        Route::delete('/destroy/{id}', [ModelTypeController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix'=>'network','as'=>'network.'], function(){
       Route::get('/', [NetworkController::class, 'index'])->name('index');
