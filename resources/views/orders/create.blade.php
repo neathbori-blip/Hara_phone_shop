@@ -71,16 +71,18 @@
 
     {{-- Per brand --}}
     @foreach($brands as $brand)
-    <button type="button" class="brand-btn" data-brand="{{ $brand->id }}"
-            style="width:70px; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:#fff; border:2px solid transparent; border-radius:10px; cursor:pointer; padding:8px 4px; font-size:11px; font-weight:600; color:#555; transition:all .18s; text-align:center; line-height:1.2;">
-      @if($brand->logo)
-        <img src="{{ asset('/'.$brand->logo) }}" alt="{{ $brand->name }}" style="width:32px; height:32px; object-fit:contain;">
-      @else
-        <i class='bx bx-mobile-alt' style="font-size:20px; color:#888;"></i>
-      @endif
-      <span>{{ $brand->name }}</span>
-    </button>
-    @endforeach
+<button type="button" class="brand-btn" data-brand="{{ $brand->id }}"
+        style="width:70px; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:#fff; border:2px solid transparent; border-radius:10px; cursor:pointer; padding:8px 4px; font-size:11px; font-weight:600; color:#555; transition:all .18s; text-align:center; line-height:1.2;">
+  @if($brand->logo)
+    <img src="{{ asset('assets/icons/brands/' . $brand->logo) }}"
+         alt="{{ $brand->name }}"
+         style="width:32px; height:32px; object-fit:contain;">
+  @else
+    <i class='bx bx-mobile-alt' style="font-size:20px; color:#888;"></i>
+  @endif
+  <span>{{ $brand->name }}</span>
+</button>
+@endforeach
   </div>
 
   {{-- ══ MAIN: search + product grid ══ --}}

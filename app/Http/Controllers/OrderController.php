@@ -125,6 +125,7 @@ class OrderController extends Controller
             'order_date'   => 'required|date',
             'productIds'   => 'required|array|min:1',
             'productIds.*' => 'exists:products,id',
+            
         ]);
 
         $order = Order::create([
