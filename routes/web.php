@@ -97,21 +97,27 @@ Route::group([
         Route::post('/profile/update/password', [UserController::class, 'updatePassword'])->name('update.profile.password');
     });
     
-    Route::group(['prefix' => 'order', 'as' => 'orders.'], function () {
-    Route::get('/',           [OrderController::class, 'index'])->name('index');
-    Route::get('/create',     [OrderController::class, 'create'])->name('create');
-    Route::post('/store',     [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',    [OrderController::class, 'show'])->name('show');
-    Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+
+        Route::group(['prefix' => 'order', 'as' => 'orders.'], function () {
+    Route::get('/',                    [OrderController::class, 'index'])->name('index');
+    Route::get('/create',              [OrderController::class, 'create'])->name('create');
+    Route::post('/store',              [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',             [OrderController::class, 'show'])->name('show');
+    Route::delete('/{order}',          [OrderController::class, 'destroy'])->name('destroy');
+    Route::get('/{order}/invoice',     [OrderController::class, 'invoice'])->name('invoice');      // ← ADD
+    Route::get('/{order}/invoice/pdf', [OrderController::class, 'invoicePdf'])->name('invoice.pdf'); // ← ADD
 });
 
-    Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
-    Route::get('/',           [OrderController::class, 'index'])->name('index');
-    Route::get('/create',     [OrderController::class, 'saleCreate'])->name('create'); // ← saleCreate
-    Route::post('/',          [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',    [OrderController::class, 'show'])->name('show');
-    Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+Route::group(['prefix' => 'sale', 'as' => 'sales.'], function () {
+    Route::get('/',                    [OrderController::class, 'saleIndex'])->name('index');      // ← change to saleIndex
+    Route::get('/create',              [OrderController::class, 'saleCreate'])->name('create');
+    Route::post('/store',              [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',             [OrderController::class, 'saleShow'])->name('show');        // ← change to saleShow
+    Route::delete('/{order}',          [OrderController::class, 'destroy'])->name('destroy');
+    Route::get('/{order}/invoice',     [OrderController::class, 'invoice'])->name('invoice');      // ← ADD
+    Route::get('/{order}/invoice/pdf', [OrderController::class, 'invoicePdf'])->name('invoice.pdf'); // ← ADD
 });
+
 
     Route::group(['prefix'=>'cart','as'=>'carts.'], function(){
       Route::post('/store', [CartController::class, 'store'])->name('store');

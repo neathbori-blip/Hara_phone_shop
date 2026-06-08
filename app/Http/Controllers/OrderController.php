@@ -170,6 +170,44 @@ class OrderController extends Controller
         ));
     }
 
+    public function saleIndex(Request $request)
+{
+    $query = Order::with('employee', 'customer'); // ← add this
+    $customers = Customer::all();
+    $parameterNames = [];
+
+    if ($request->search) {
+        $filters = $request->only(['customer', 'from_date', 'to_date']);
+
+        if (!empty($filters['customer'])) {
+            $query->where('customer_id', $filters['customer']);
+            $parameterNames['customer'] = $filters['customer'];
+        }
+
+        if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+            $query->whereBetween('order_date', [$filters['from_date'], $filters['to_date']]);
+            $parameterNames['from_date'] = $filters['from_date'];
+            $parameterNames['to_date'] = $filters['to_date'];
+        } elseif (!empty($filters['from_date'])) {
+            $query->where('order_date', '>=', $filters['from_date']);
+            $parameterNames['from_date'] = $filters['from_date'];
+        } elseif (!empty($filters['to_date'])) {
+            $query->where('order_date', '<=', $filters['to_date']);
+            $parameterNames['to_date'] = $filters['to_date'];
+        }
+    }
+
+    $orders = $query->orderBy('order_date', 'desc')->paginate(20);
+    return view('sales.index', compact('orders', 'customers', 'parameterNames'));
+}
+
+public function saleShow(string $lang, Order $order)
+{
+    $order = $order->with('orderDetails', 'customer', 'employee')->findOrFail($order->id);
+    $order_detals = OrderDetail::where('order_id', $order->id)->with('product')->get();
+    return view('sales.show', compact('order', 'order_detals'));  // ← goes to sales/show.blade.php
+}
+
     public function saleCreate()
     {
         $customers   = Customer::all();

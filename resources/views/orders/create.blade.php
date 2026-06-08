@@ -104,7 +104,7 @@
          style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; overflow-y:auto; padding-right:4px; align-content:start;">
 
       @forelse($products as $product)
-      <div class="product-card"
+      <div class="product-card" 
            data-id="{{ $product->id }}"
            data-name="{{ $product->name }}"
            data-price="{{ $product->selling_price }}"
