@@ -57,15 +57,16 @@ class EmployeeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($lang, $id)
-    {
-        $user = User::with('employee')->findOrfail($id);
-        $roles = Role::pluck('name', 'id');
-        return view('employees.edit-profile', [
-          'user' => $user,
-          'roles' => $roles
-        ]);
-    }
+    public function edit(string $lang, $id)
+{
+    $user = User::with('employee')->findOrFail($id);
+    $roles = Role::pluck('name', 'id');
+    return view('employees.edit-profile', [
+        'user' => $user,
+        'roles' => $roles
+    ]);
+}
+
 
     /**
      * Update the specified resource in storage.
@@ -118,21 +119,24 @@ class EmployeeController extends Controller
      */
     public function destroy(Request $request, string $lang, $id)
     {
-        $request->validate([
-            'confirm' => 'required',
-        ]);
+        
+        $user = User::findOrFail($id);
         // Find the User by ID
         // $user = User::findOrFail($id);
-
+        
+         if ($user->employee) {
+        $user->employee->delete(); // no parentheses on employee
+        }
         // Delete the associated Employee
         // $user->employee()->destroy($id);
 
         // Optionally, you can also delete the User itself
-        User::destroy($id);
-        return redirect()->route('users.index', withLang())->with('success', 'Branch soft deleted successfully');
+        $user->delete();
+        return redirect()->route('users.index', withLang())
+        ->with('success', 'User deleted successfully');
     }
 
-    public function editPassword($id)
+    public function editPassword(string $lang, $id)
     {
         $user = User::with('employee')->findOrfail($id);
         return view('employees.edit-password', [
@@ -140,14 +144,15 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function updatePassword(Request $request, $id)
+    public function updatePassword(Request $request, string $lang, string $id)  
     {
-        $request->validate([
-            'new_password' => 'required|confirmed',
-        ]);
-        $user = User::findOrfail($id);
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-        return redirect()->route('users.edit.password', withLang(['id' => $user->id]))->with('success', 'Password updated successfully');
+    $request->validate([
+        'new_password' => 'required|confirmed',
+    ]);
+    $user = User::findOrFail($id);
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+    return redirect()->route('users.index', withLang(['id' => $user->id]))
+        ->with('success', 'Password updated successfully');
     }
 }

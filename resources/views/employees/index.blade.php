@@ -55,9 +55,25 @@
                             <td>{!! $user->employee->statusname ?? ''!!}</td>
                             @can('user-edit')
                             <td>
-                                    <a href="{{ route('users.edit', withLang(['id' => $user->id])) }}" class="btn btn-icon btn-outline-secondary">
-                                        <span class="tf-icons bx bx-edit-alt"></span>
-                                    </a>
+                                <a href="{{ route('users.edit', withLang(['id' => $user->id])) }}" 
+                                   class="btn btn-icon btn-outline-secondary">
+                                    <span class="tf-icons bx bx-edit-alt"></span>
+                                </a>
+                                @can('user-delete')
+                                {!!
+                                Form::open([
+                                'method' => 'DELETE',
+                                'route' => ['users.destroy',withLang(['id' => $user->id])],
+                                'style' => 'display:inline'
+                                ])
+                                !!}
+                                <button type="submit"
+                                        class="btn btn-icon btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to delete this user?')">
+                                    <span class="tf-icons bx bx-trash"></span>
+                                </button>
+                                {!! Form::close() !!}
+                                @endcan
                             </td>
                             @endcan
                         </tr>
