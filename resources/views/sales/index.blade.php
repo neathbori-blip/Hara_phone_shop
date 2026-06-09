@@ -29,7 +29,6 @@
                       <th>{{__('order.amount')}}</th>
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
-                      <th>{{__('order.sale_by')}}</th>
                       <th>{{__('order.sale_date')}}</th>
                       @canany(['product-list', 'product-edit', 'product-delete', 'order-create'])
                       <th>Actions</th>
@@ -44,7 +43,6 @@
                           <td>{{ setToStringDolla($order->total_amount) ?? ''}}</td>
                           <td>{!! $order->payment_status_badges ?? ''!!}</td>
                           <td>{!! $order->payment_type_badges ?? '' !!}</td>
-                          <td>{{ $order->employee->name ?? '' }}</td>
                           <td>{!! '<span class="badge bg-label-info">'.setToStringDateFormat($order->order_date).'</span>'!!}</td>
                           <td>
                               @can('order-list')
@@ -74,7 +72,6 @@
                       <th>{{__('order.amount')}}</th>
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
-                      <th>{{__('order.sale_by')}}</th>
                       <th>{{__('order.sale_date')}}</th>
                       @canany(['product-list', 'product-edit', 'product-delete', 'order-create'])
                       <th>Actions</th>

@@ -29,7 +29,6 @@
                       <th>{{__('order.amount')}}</th>
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
-                      <th>{{__('order.sale_by')}}</th>
                       <th>{{__('order.sale_date')}}</th>
                       @can(['product-list'],['product-edit'], ['product-delete'], ['order-creat'])
                       <th>Actions</th>
@@ -75,7 +74,6 @@
                       <th>{{__('order.amount')}}</th>
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
-                      <th>{{__('order.sale_by')}}</th>
                       <th>{{__('order.sale_date')}}</th>
                       <th>{{__('order.image')}}</th>
                       @can(['product-list'],['product-edit'], ['product-delete'], ['order-creat'])

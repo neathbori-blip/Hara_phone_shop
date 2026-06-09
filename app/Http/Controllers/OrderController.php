@@ -92,12 +92,20 @@ class OrderController extends Controller
     }
 
     public function destroy(string $lang, Order $order)
-    {
-        $orderDetial = OrderDetail::where('order_id', $order->id)->get();
+{
+    OrderDetail::where('order_id', $order->id)->delete();
+    $order->delete();
 
-        return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
-    }
+    return redirect()->route('orders.index', withLang())->with('success', 'Order deleted successfully');
+}
 
+public function saleDestroy(string $lang, Order $order)
+{
+    OrderDetail::where('order_id', $order->id)->delete();
+    $order->delete();
+
+    return redirect()->route('sales.index', withLang())->with('success', 'Sale deleted successfully');
+}
     /**
      * Display the specified resource.
      */
@@ -133,7 +141,7 @@ class OrderController extends Controller
         'employee_id'  => Auth::id(),
         'order_date'   => $request->order_date,
         'total_price'  => 0,
-        'total_amount' => 0, // ✅ add this line
+        'total_amount' => 0,
     ]);
 
         $total = 0;
