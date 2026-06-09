@@ -44,6 +44,18 @@
                             <a href="#" class="btn btn-icon btn-outline-secondary edit-series" data-bs-toggle="modal" data-bs-target="#editSeries" data-id="{{ $serial->id }}" data-value="{{ $serial->name }}">
                                 <span class="tf-icons bx bx-edit-alt"></span>
                             </a>
+
+                            <form action="{{ route('serial.destroy', array_merge(withLang(), ['id' => $serial->id])) }}"
+                                  method="POST"
+                                  class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="btn btn-icon btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to delete {{ $serial->name }}?')">
+                                    <span class="tf-icons bx bx-trash"></span>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach
@@ -88,7 +100,7 @@
                                         </div>
 
 
-                                         <div class="row g-2">
+                                         <!-- <div class="row g-2">
                                             <div class="col mb-0">
                                                 <label for="emailBasic" class="form-label">Email</label>
                                                 <input type="text" id="emailBasic" class="form-control" placeholder="xxxx@xxx.xx">
@@ -97,7 +109,7 @@
                                                 <label for="dobBasic" class="form-label">DOB</label>
                                                 <input type="text" id="dobBasic" class="form-control" placeholder="DD / MM / YY">
                                             </div>
-                                        </div> 
+                                        </div>  -->
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{__('button.close')}}</button>
