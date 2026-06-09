@@ -37,8 +37,7 @@
                                 height="100"
                                 width="100"
                                 id="uploadedAvatar"
-                                onError="this.onerror=null;this.src='{{ asset('/assets/img/blank-profile.png') }}';"
-                            />
+                                onError="this.onerror=null;this.src='{{ asset('/assets/img/blank-profile.png') }}';"/>
 
                             <div class="button-wrapper">
                                 <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">

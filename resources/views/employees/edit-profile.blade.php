@@ -51,7 +51,7 @@
                                       accept="image/png, image/jpeg"
                                     />
                                 </label>
-                                <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
+                                <button type="reset" class="btn btn-outline-secondary account-image-reset mb-4">
                                     <i class="bx bx-reset d-block d-sm-none"></i>
                                     <span class="d-none d-sm-block">{{ __('common.lbl_reset') }}</span>
                                 </button>
@@ -293,8 +293,10 @@
             );
         });
         $('.account-image-reset').click(function(){
-            var mediaUserdata = $('.mediaUserdata').val();
-            $('#uploadedAvatar').attr('src', mediaUserdata);
+           var mediaUserdata = $('.mediaUserdata').val();
+           console.log('reset clicked, src:', mediaUserdata); // debug
+           $('#uploadedAvatar').attr('src', mediaUserdata);
+           $('#upload').val('');
         });
     });
     function getBase64(file) {
