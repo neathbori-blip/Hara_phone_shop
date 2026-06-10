@@ -5,7 +5,36 @@
   .select2-container .select2-selection--single { height: 44px !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; }
   .select2-container .select2-selection--single .select2-selection__rendered { line-height: 44px !important; padding-left: 14px !important; color: #374151; font-size: 14px; }
   .select2-container .select2-selection--single .select2-selection__arrow { height: 44px !important; }
-  .select2-container--open .select2-selection--single { border-color: #696cff !important; box-shadow: 0 0 0 3px rgba(105,108,255,0.1) !important; }
+  .select2-container--open .select2-selection--single { border-color: !important; box-shadow: 0 0 0 3px rgba(105,108,255,0.1) !important; }
+
+  /* ── FIX: dropdown option text visibility ── */
+  .select2-results__option {
+    color: #374151 !important;
+    background-color: #ffffff !important;
+    font-size: 14px !important;
+    padding: 8px 14px !important;
+  }
+  .select2-results__option--highlighted {
+    background-color: #696cff !important;
+    color: #ffffff !important;
+  }
+  .select2-results__option[aria-selected="true"] {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+  }
+  .select2-dropdown {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  }
+  .select2-search--dropdown .select2-search__field {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    color: #374151 !important;
+  }
+
   @keyframes rowIn {
     from { opacity: 0; transform: translateY(-4px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -17,6 +46,7 @@
 @section('content')
 <div class="container-fluid flex-grow-1 container-p-y">
 
+  {{-- ── Page Title ── --}}
   <div class="flex items-center justify-between mb-4">
     <h4 class="text-lg font-bold text-gray-800 mb-0">
       {{ __('order.create_sale') ?? 'Register Sale' }}
@@ -26,8 +56,10 @@
   <form id="orderForm" action="{{ route('sales.store', withLang()) }}" method="POST">
     @csrf
 
+    {{-- ── Card 1: Sale Date + Customer + Product ── --}}
     <div class="card rounded-xl border border-gray-100 shadow-sm mb-4">
       <div class="card-body p-5">
+
         <div class="row g-3">
 
           {{-- Sale Date --}}
@@ -50,7 +82,7 @@
             </label>
             <select name="customer_id"
                     id="customerSelect"
-                    class="form-select rounded-lg border-gray-200 text-sm">
+                    class="select2 form-select rounded-lg border-gray-200 text-sm">
               <option value="">{{ __('order.walk_in_customer') ?? 'Walk in Customer' }}</option>
               @foreach($customers as $customer)
                 <option value="{{ $customer->id }}">{{ $customer->name }}</option>
@@ -63,16 +95,16 @@
             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
               {{ __('order.product_name') ?? 'Product Name' }}
             </label>
-            <select id="productSelect" class="form-select rounded-lg border-gray-200 text-sm">
-              <option value="">{{ __('order.select_product') ?? 'Select Product' }}</option>
+            <select id="productSelect" class="select2 form-select rounded-lg border-gray-200 text-sm">
+              <option value="">{{ __('order.select_product') ?? 'Select Order Product' }}</option>
               @foreach($products as $product)
                 <option value="{{ $product->id }}"
                         data-name="{{ $product->product_name }}"
                         data-imei="{{ $product->product_imei ?? '-' }}"
                         data-price="{{ $product->selling_price }}"
-                        data-detail="{{ $product->condition_name.', '.optional($product->modelType)->name.', '.optional($product->storage)->name.', '.optional($product->color)->name }}">
-                  {{ $product->product_name }}
-                  @if($product->product_imei) [ IMEI: {{ $product->product_imei }} ] @endif
+                        data-detail="{{ ($product->condition ?? 'Used').', '.optional($product->modelType)->name.', '.optional($product->storage)->name.', '.optional($product->color)->name }}">
+                  {{ $product->name }}
+                  @if($product->imei) [ IMEI: {{ $product->imei }} ] @endif
                 </option>
               @endforeach
             </select>
@@ -82,10 +114,11 @@
       </div>
     </div>
 
-    {{-- Card 2: Product Table --}}
+    {{-- ── Card 2: Product Table ── --}}
     <div class="card rounded-xl border border-gray-100 shadow-sm mb-4">
       <div class="card-body p-0">
 
+        {{-- Table header --}}
         <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <span class="text-sm font-semibold text-gray-600">
             {{ __('order.order_items') ?? 'Order Items' }}
@@ -145,7 +178,7 @@
       </div>
     </div>
 
-    {{-- Card 3: Note --}}
+    {{-- ── Card 3: Note ── --}}
     <div class="card rounded-xl border border-gray-100 shadow-sm mb-5">
       <div class="card-body p-5">
         <label class="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5">
@@ -158,8 +191,10 @@
       </div>
     </div>
 
+    {{-- Hidden inputs --}}
     <div id="hiddenInputs"></div>
 
+    {{-- ── Buttons ── --}}
     <div class="flex items-center gap-3">
       <button type="submit"
               class="btn btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold">
@@ -179,33 +214,34 @@
 
 @push('script')
 <script>
-  let cart = [];
-
   $(document).ready(function() {
+    // ── Initialize Select2 ──
     $('#customerSelect').select2();
     $('#productSelect').select2();
+  });
 
-    // ── Select product → add to table
-    $('#productSelect').on('change', function () {
-      const option = this.options[this.selectedIndex];
-      if (!option.value) return;
+  let cart = [];
 
-      const id     = option.value;
-      const name   = option.dataset.name;
-      const imei   = option.dataset.imei;
-      const price  = parseFloat(option.dataset.price);
-      const detail = option.dataset.detail;
+  // ── Select product → add to table
+  $('#productSelect').on('change', function () {
+    const option = this.options[this.selectedIndex];
+    if (!option.value) return;
 
-      if (cart.find(i => i.id === id)) {
-        alert('This product is already added.');
-        $(this).val('').trigger('change');
-        return;
-      }
+    const id     = option.value;
+    const name   = option.dataset.name;
+    const imei   = option.dataset.imei;
+    const price  = parseFloat(option.dataset.price);
+    const detail = option.dataset.detail;
 
-      cart.push({ id, name, imei, price, detail });
+    if (cart.find(i => i.id === id)) {
+      alert('This product is already added.');
       $(this).val('').trigger('change');
-      renderTable();
-    });
+      return;
+    }
+
+    cart.push({ id, name, imei, price, detail });
+    $(this).val('').trigger('change');
+    renderTable();
   });
 
   // ── Remove row
