@@ -31,7 +31,7 @@
                         <th>{{__('customer.nationality')}}</th>
                         <th>{{__('customer.phone')}}</th>
                         <th>{{__('customer.id_card_number')}}</th>
-                        @can(['customer-edit'])
+                        @can('customer-edit')
                         <th>{{__('customer.action')}}</th>
                         @endcan
                     </tr>
@@ -46,9 +46,8 @@
                                         data-popup="tooltip-custom"
                                         data-bs-placement="top"
                                         class="avatar avatar-xs pull-up"
-                                        title="{{$customer->name}}"
-                                        >
-                                        <img src="{{ $customer->getProfileImageAttribute() }}" alt="Avatar" class="rounded-circle" onError="this.onerror=null;this.src='{{ asset('/assets/img/blank-profile.png') }}';"/>
+                                        title="{{$customer->name}}">
+                                        <img src="{{ $customer->getProfileImageAttribute() }}" alt="Avatar" class="rounded-circle" onError="this.onerror=null;this.src='{{ asset('/assets/img/blank-profile.png') }}';" />
                                     </li>
                                 </ul>
                             </td>
@@ -61,38 +60,36 @@
 
                             @can('customer-edit')
                             <td>
-                                <a href="{{ route('customers.edit', withLang(['id' => $customer->id])) }}" class="btn btn-icon btn-outline-secondary">
+                                <a href="{{ route('customers.edit', withLang(['id' => $customer->id])) }}"
+                                   class="btn btn-icon btn-outline-secondary">
                                     <span class="tf-icons bx bx-edit-alt"></span>
                                 </a>
 
-                                <a href="{{ route('customers.show', withLang(['id' => $customer->id])) }}" class="btn btn-icon btn-outline-secondary">
+                                <a href="{{ route('customers.show', withLang(['id' => $customer->id])) }}"
+                                   class="btn btn-icon btn-outline-secondary">
                                     <span class="tf-icons bx bx-detail"></span>
                                 </a>
-                            </td>
 
+                                <form action="{{ route('customers.destroy', withLang(['id' => $customer->id])) }}"
+                                      method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="btn btn-icon btn-outline-danger"
+                                            onclick="return confirm('Are you sure you want to delete {{ $customer->name }}?')">
+                                        <span class="tf-icons bx bx-trash"></span>
+                                    </button>
+                                </form>
+                            </td>
                             @endcan
                         </tr>
                     @endforeach
-
                 </tbody>
-                <tfoot class="table-border-bottom-0">
-                    <tr>
-                        <th></th>
-                        <th>{{__('customer.name')}}</th>
-                        <th>{{__('customer.customer_type')}}</th>
-                        <th>{{__('customer.gender')}}</th>
-                        <th>{{__('customer.nationality')}}</th>
-                        <th>{{__('customer.phone')}}</th>
-                        <th>{{__('customer.id_card_number')}}</th>
-                        @can(['customer-edit'])
-                        <th>{{__('customer.action')}}</th>
-                        @endcan
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </div>
     <!--/ List User Table -->
+
     <div class="modal fade" id="customerSearchModal" tabindex="-1" aria-hidden="true">
         <form method="GET" action="{{ url()->current() }}">
             <div class="modal-dialog modal-xl" role="document">
@@ -112,7 +109,6 @@
                         <div class="row">
                             <div class="col mb-3">
                                 <label for="name" class="form-label">Search Customer Name</label>
-                                <!-- <input type="text" id="customer-name" name="search_customer" value="@if(isset($parameterNames['search_customer']) && $parameterNames['search_customer'] != '') {{ $parameterNames['search_customer'] }} @endif" class="form-control" placeholder="{{__('customer.placholder_search_name_or_imei')}}" /> -->
                                 <select id="name" class="select2 form-select" name="name">
                                     <option></option>
                                     <option value="">{{ __('common.lbl_select') }} </option>
@@ -123,7 +119,7 @@
                             </div>
                             <div class="col mb-0">
                                 <label for="customer-phone" class="form-label">លេខទូរស័ព្ទ</label>
-                                <input type="text" id="phone" name="phone" value="@if(isset($parameterNames['phone']) && $parameterNames['phone'] != '') {{ $parameterNames['search_customer'] }} @endif" class="form-control" placeholder="លេខទូរស័ព្ទអតិថិជន" />
+                                <input type="text" id="phone" name="phone" value="@if(isset($parameterNames['phone']) && $parameterNames['phone'] != '') {{ $parameterNames['phone'] }} @endif" class="form-control" placeholder="លេខទូរស័ព្ទអតិថិជន" />
                             </div>
                         </div>
                         <div class="row g-2 mb-3">
@@ -144,17 +140,6 @@
                                 </select>
                             </div>
                         </div>
-                        <!-- <div class="row g-2">
-                            <div class="col mb-0">
-                                <select id="customer_id_number" class="select2 form-select" name="customer_id_number">
-                                    <option></option>
-                                    <option value=""> Customer Id Number </option>
-                                    @foreach ($customers as $key => $value)
-                                        <option value="{{ $key }}" @if(isset($parameterNames['customer_id_number']) && $parameterNames['customer_id_number'] == $key) selected @endif>{{ $value }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div> -->
                     </div>
                     <div class="modal-footer">
                         <a href="{{ route('customers.index', withLang()) }}" class="btn btn-outline-secondary">
@@ -169,6 +154,7 @@
 </div>
 <!-- / Content -->
 @endsection
+
 @push('script')
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css" rel="stylesheet"/>
@@ -195,16 +181,16 @@
         top: 8px;
     }
 </style>
-    <script>
-        function submitForm(){
-            $('.submit-delete').click();
-        }
-        $(document).ready( function(){
-            $("#name").select2({
+<script>
+    function submitForm(){
+        $('.submit-delete').click();
+    }
+    $(document).ready(function(){
+        $("#name").select2({
             dropdownParent: $('#customerSearchModal'),
             placeholder: "សូមជ្រើសរើសអតិថិជន",
             allowClear: true
         });
-        })
-    </script>
+    })
+</script>
 @endpush
