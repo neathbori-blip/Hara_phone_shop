@@ -117,6 +117,7 @@ Route::group([
       Route::get('/create', [NetworkController::class, 'create'])->name('create');
       Route::post('/store', [NetworkController::class, 'store'])->name('store');
       Route::post('/update', [NetworkController::class, 'update'])->name('update');
+      Route::delete('/destroy/{id}', [NetworkController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix'=>'serial','as'=>'serial.'], function(){
         Route::get('/', [SerialController::class, 'index'])->name('index');
@@ -130,6 +131,7 @@ Route::group([
         Route::get('/create', [BrandController::class, 'create'])->name('create');
         Route::post('/store', [BrandController::class, 'store'])->name('store');
         Route::post('/update', [BrandController::class, 'update'])->name('update');
+        Route::delete('/destroy/{id}', [BrandController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix'=>'color', 'as'=>'color.'], function(){
         Route::get('/', [ColorController::class, 'index'])->name('index');
@@ -143,6 +145,7 @@ Route::group([
         Route::get('/create', [StorageController::class, 'create'])->name('create');
         Route::post('/store', [StorageController::class, 'store'])->name('store');
         Route::post('/update', [StorageController::class, 'update'])->name('update');
+        Route::delete('/destroy/{id}', [StorageController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix'=>'loan','as'=>'loans.'], function(){
       Route::get('/', [LoanController::class, 'index'])->name('index');
