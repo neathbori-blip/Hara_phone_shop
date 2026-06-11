@@ -71,18 +71,18 @@
 
     {{-- Per brand --}}
     @foreach($brands as $brand)
-<button type="button" class="brand-btn" data-brand="{{ $brand->id }}"
-        style="width:70px; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:#fff; border:2px solid transparent; border-radius:10px; cursor:pointer; padding:8px 4px; font-size:11px; font-weight:600; color:#555; transition:all .18s; text-align:center; line-height:1.2;">
-  @if($brand->logo)
-    <img src="{{ asset('assets/icons/brands/' . $brand->logo) }}"
-         alt="{{ $brand->name }}"
-         style="width:32px; height:32px; object-fit:contain;">
-  @else
-    <i class='bx bx-mobile-alt' style="font-size:20px; color:#888;"></i>
-  @endif
-  <span>{{ $brand->name }}</span>
-</button>
-@endforeach
+    <button type="button" class="brand-btn" data-brand="{{ $brand->id }}"
+            style="width:70px; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; background:#fff; border:2px solid transparent; border-radius:10px; cursor:pointer; padding:8px 4px; font-size:11px; font-weight:600; color:#555; transition:all .18s; text-align:center; line-height:1.2;">
+      @if($brand->logo)
+        <img src="{{ asset('assets/icons/brands/' . $brand->logo) }}"
+             alt="{{ $brand->name }}"
+             style="width:32px; height:32px; object-fit:contain;">
+      @else
+        <i class='bx bx-mobile-alt' style="font-size:20px; color:#888;"></i>
+      @endif
+      <span>{{ $brand->name }}</span>
+    </button>
+    @endforeach
   </div>
 
   {{-- ══ MAIN: search + product grid ══ --}}
@@ -104,25 +104,21 @@
          style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; overflow-y:auto; padding-right:4px; align-content:start;">
 
       @forelse($products as $product)
-      <div class="product-card" 
+      <div class="product-card"
            data-id="{{ $product->id }}"
-           data-name="{{ $product->name }}"
+           data-name="{{ $product->product_name }}"
            data-price="{{ $product->selling_price }}"
            data-brand="{{ $product->brand_id }}"
-           data-imei="{{ $product->imei ?? '' }}"
-           data-img="{{ $product->image ? asset('storage/'.$product->image) : '' }}"
+           data-imei="{{ $product->product_imei ?? '' }}"
+           data-img="{{ $product->image_name }}"
            style="background:#fff; border-radius:10px; overflow:hidden; border:2px solid transparent; cursor:pointer; transition:border-color .18s, box-shadow .18s;">
 
         <div style="position:relative; width:100%; padding-top:80%; background:#f5f5f5; overflow:hidden;">
-          @if($product->image)
-            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}"
-                 style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
-          @else
-            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#ccc; font-size:12px; text-align:center; gap:6px;">
-              <i class='bx bx-camera' style="font-size:36px;"></i>
-              <span>Product Image<br>Coming Soon</span>
-            </div>
-          @endif
+          {{-- ✅ FIXED: use image_name accessor which builds correct path --}}
+          <img src="{{ $product->image_name }}"
+               alt="{{ $product->product_name }}"
+               style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+
           <div class="product-overlay"
                style="position:absolute; inset:0; background:rgba(105,108,255,.15); display:flex; align-items:center; justify-content:center;">
             <button type="button" class="overlay-add-btn" onclick="toggleCart(this)"
@@ -134,17 +130,16 @@
 
         <div style="padding:9px 10px 11px;">
           <div style="font-size:13px; font-weight:600; color:#2a2a2a; line-height:1.3;">
-            {{ $product->name }}
-            @if($product->imei)
-              <span style="font-size:12px; font-weight:400; color:#999;">[ IMEI: {{ substr($product->imei, -4) }} ]</span>
+            {{ $product->product_name }}
+            @if($product->product_imei)
+              <span style="font-size:12px; font-weight:400; color:#999;">[ IMEI: {{ substr($product->product_imei, -4) }} ]</span>
             @endif
           </div>
           <div style="font-size:11px; color:#aaa; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-            {{ $product->condition ?? 'Used' }},
+            {{ $product->condition_name ?? 'Used' }},
             {{ optional($product->modelType)->name }},
             {{ optional($product->storage)->name }},
-            {{ optional($product->color)->name }},
-            {{ $product->grade ?? 'Original' }}
+            {{ optional($product->color)->name }}
           </div>
           <div style="font-size:15px; font-weight:700; color:#2a2a2a; margin-top:6px;">
             ${{ number_format($product->selling_price, 2) }}
@@ -335,13 +330,11 @@
       const div = document.createElement('div');
       div.className = 'cart-item animate-fade-slide';
       div.style.cssText = 'display:flex; align-items:center; gap:9px; padding:8px; background:#f8f8ff; border-radius:8px; border:1px solid #ebebff;';
+
+      {{-- ✅ FIXED: image_name always returns a URL so no ternary needed --}}
       div.innerHTML = `
-        ${item.img
-          ? `<img style="width:42px;height:42px;border-radius:6px;object-fit:cover;background:#eee;flex-shrink:0;" src="${item.img}" alt="">`
-          : `<div style="width:42px;height:42px;border-radius:6px;background:#eee;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-               <i class='bx bx-camera' style="font-size:18px;color:#bbb;"></i>
-             </div>`
-        }
+        <img style="width:42px;height:42px;border-radius:6px;object-fit:cover;background:#eee;flex-shrink:0;"
+             src="${item.img}" alt="">
         <div style="flex:1;min-width:0;">
           <div style="font-size:12px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
           <div style="font-size:13px;color:#696cff;font-weight:700;">$${item.price.toFixed(2)}</div>

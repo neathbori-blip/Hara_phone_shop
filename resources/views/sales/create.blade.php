@@ -7,7 +7,6 @@
   .select2-container .select2-selection--single .select2-selection__arrow { height: 44px !important; }
   .select2-container--open .select2-selection--single { border-color: !important; box-shadow: 0 0 0 3px rgba(105,108,255,0.1) !important; }
 
-  /* ── FIX: dropdown option text visibility ── */
   .select2-results__option {
     color: #374151 !important;
     background-color: #ffffff !important;
@@ -102,9 +101,9 @@
                         data-name="{{ $product->product_name }}"
                         data-imei="{{ $product->product_imei ?? '-' }}"
                         data-price="{{ $product->selling_price }}"
-                        data-detail="{{ ($product->condition ?? 'Used').', '.optional($product->modelType)->name.', '.optional($product->storage)->name.', '.optional($product->color)->name }}">
-                  {{ $product->name }}
-                  @if($product->imei) [ IMEI: {{ $product->imei }} ] @endif
+                        data-detail="{{ $product->condition_name ?? 'Used' }}, {{ optional($product->modelType)->name }}, {{ optional($product->storage)->name }}, {{ optional($product->color)->name }}">
+                  {{ $product->product_name }}
+                  @if($product->product_imei) [ IMEI: {{ $product->product_imei }} ] @endif
                 </option>
               @endforeach
             </select>
@@ -215,7 +214,6 @@
 @push('script')
 <script>
   $(document).ready(function() {
-    // ── Initialize Select2 ──
     $('#customerSelect').select2();
     $('#productSelect').select2();
   });
