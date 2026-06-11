@@ -22,7 +22,7 @@ class Loan extends Model
       4 => 'Reject',
     ];
 
-
+    
     protected $fillable = [
       'customer_id',
       'employee_id',
