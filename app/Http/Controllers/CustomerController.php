@@ -71,6 +71,7 @@ class CustomerController extends Controller
         return view('customers.create', ['customers' => $customers]);
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
@@ -240,7 +241,10 @@ class CustomerController extends Controller
             'salary_date' => $request->date_income ?? '',
             'other_income' => $request->other_income ?? 0,
           ];
-          $customer->job->update($customerJobData);
+                    CustomerJob::updateOrCreate(
+              ['customer_id' => $customer->id],
+              $customerJobData
+          );
 
           $customerGuarantorData = [
             'id_card_number' => $request->guarantor_id_card_number ?? '',
@@ -262,7 +266,10 @@ class CustomerController extends Controller
             'mobile' => $request->guarantor_mobile ?? '',
             'facebook' => $request->guarantor_facebook ?? '',
           ];
-          $customer->guarantor->update($customerGuarantorData);
+         CustomerGuarantor::updateOrCreate(
+    ['customer_id' => $customer->id],
+    $customerGuarantorData
+);
         }
 
         // Customer::findOrFail($id)->update($customerData);
@@ -275,10 +282,6 @@ class CustomerController extends Controller
      */
     public function destroy(Request $request, string $lang, $id)
     {
-        $request->validate([
-            'confirm' => 'required',
-        ]);
-
         // try {
             Customer::destroy($id);
             // dd($request);
@@ -288,6 +291,7 @@ class CustomerController extends Controller
 
         //     return redirect()->back()->with('error', 'Error deleting customer: ' . $e->getMessage());
         // }
+        
     }
 
     public function editPassword($id)
@@ -309,3 +313,5 @@ class CustomerController extends Controller
         return redirect()->route('customers.edit.password', withLang(['id' => $customer->id]))->with('success', 'Password updated successfully');
     }
 }
+
+

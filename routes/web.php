@@ -179,7 +179,8 @@ Route::group([
       Route::post('/profile/update', [CustomerController::class, 'update'])->name('update.profile');
       Route::get('/profile/edit/password', [CustomerController::class, 'editPassword'])->name('edit.profile.password');
       Route::post('/profile/update/password', [CustomerController::class, 'updatePassword'])->name('update.profile.password');
-
+      Route::delete('/destroy/{id}', [CustomerController::class, 'destroy'])->name('destroy');
+      
       Route::group(['prefix'=>'gurantor', 'as'=>'gurantors.'], function(){
         Route::get('/', [GurantorController::class, 'index'])->name('index');
       });
