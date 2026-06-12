@@ -10,21 +10,19 @@ class ModelTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request,string $lang)
+    public function index(Request $request, string $lang)
     {
-        //
-
         $model_types = ModelType::withCount([
-          'products',
-          'products as products_status_instock_count' => function ($query) {
-              $query->where('status', 1);
-          },
-          'products as products_status_sold_count' => function ($query) {
-              $query->where('status', 2);
-          },
-          'products as products_status_loan_count' => function ($query) {
-              $query->where('status', 3);
-          },
+            'products',
+            'products as products_status_instock_count' => function ($query) {
+                $query->where('status', 1);
+            },
+            'products as products_status_sold_count' => function ($query) {
+                $query->where('status', 2);
+            },
+            'products as products_status_loan_count' => function ($query) {
+                $query->where('status', 3);
+            },
         ])->get();
 
         return view('model_type.index', ['model_types' => $model_types]);
@@ -35,7 +33,6 @@ class ModelTypeController extends Controller
      */
     public function create()
     {
-        //
         // return view('modelType.create');
     }
 
@@ -44,13 +41,14 @@ class ModelTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $validatedData = $request->validate([
             'name' => 'required|string|max:25|unique:model_types,name',
         ]);
+
         $model_type = new ModelType();
         $model_type->name = $request->name;
         $model_type->save();
+
         return redirect()->route('model_type.index', withLang());
     }
 
@@ -66,7 +64,6 @@ class ModelTypeController extends Controller
      */
     public function edit(Request $model_type, string $lang, string $id)
     {
-        //
     }
 
     /**
@@ -74,27 +71,38 @@ class ModelTypeController extends Controller
      */
     public function update(Request $request, string $lang)
     {
-
         $messages = [
             'required' => 'This field can not be blanked',
-            'unique' => 'This model type is exists'
+            'unique'   => 'This model type is exists',
         ];
-        $validatedData = $request->validate(([
-            'name' => 'required|unique:model_types'
-        ]), $messages);
-        // dd($messages);
-        $model_type = ModelType::findorfail($request->id);
+
+        $validatedData = $request->validate([
+            'name' => 'required|unique:model_types',
+        ], $messages);
+
+        $model_type = ModelType::findOrFail($request->id);
         $model_type->name = $request->name;
         $model_type->save();
-        // dd($model_type);
+
         return redirect()->route('model_type.index', withLang());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ModelType $model_type)
+    public function destroy(string $lang, string $id)
     {
-        //
+        $model_type = ModelType::findOrFail($id);
+
+        // បើ model type មាន products ភ្ជាប់ → មិនអនុញ្ញាតលុប
+        if ($model_type->products()->count() > 0) {
+            return redirect()->route('model_type.index', app()->getLocale())
+                ->with('error', 'Cannot delete. This model type has products.');
+        }
+
+        $model_type->delete();
+
+        return redirect()->route('model_type.index', app()->getLocale())
+            ->with('success', 'Model Type deleted successfully.');
     }
 }

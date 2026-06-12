@@ -16,48 +16,68 @@
     </div>
     <!-- List Role Table -->
     <div class="card">
-        <h5 class="card-header">List Role</h5>
-        <div class="table-responsive text-nowrap">
-            <table class="table mb-5">
-                <thead>
+    <h5 class="card-header">List Role</h5>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle text-center mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">No</th>
+                    <th style="width: 65%;">Name</th>
+                    <th style="width: 25%;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach ($roles as $role)
                     <tr>
-                        <th>No</th>
-                        <th>Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @foreach ($roles as $key => $role)
-                        <tr>
-                            <td>{{ ++$i }}</td>
-                            <td><strong>{{ $role->name }}</strong></td>
-                            <td>
+                        <td>{{ ++$i }}</td>
+
+                        <td class="fw-semibold">
+                            {{ $role->name }}
+                        </td>
+
+                        <td>
+                            <div class="d-flex justify-content-center gap-2">
+
                                 @can('role-list')
-                                  <a href="{{ route('roles.show', withLang(['role' => $role->id])) }}" class="btn btn-icon btn-outline-secondary">
-                                    <i class='bx bxs-spreadsheet'></i>
-                                  </a>
+                                    <a href="{{ route('roles.show', withLang(['role' => $role->id])) }}"
+                                       class="btn btn-icon btn-outline-secondary">
+                                        <i class="bx bxs-spreadsheet"></i>
+                                    </a>
                                 @endcan
+
                                 @can('role-edit')
-                                  <a href="{{ route('roles.edit', withLang(['role' => $role->id])) }}" class="btn btn-icon btn-outline-secondary">
-                                      <span class="tf-icons bx bx-edit-alt"></span>
-                                  </a>
+                                    <a href="{{ route('roles.edit', withLang(['role' => $role->id])) }}"
+                                       class="btn btn-icon btn-outline-secondary">
+                                        <i class="bx bx-edit-alt"></i>
+                                    </a>
                                 @endcan
+
                                 @can('role-delete')
-                                {!! Form::open(['method' => 'DELETE','route' => ['roles.destroy', withLang(['role' => $role->id])],'style'=>'display:inline']) !!}
-                                    {!! Form::submit('Delete', ['class' => 'btn btn-danger d-none submit-delete']) !!}
-                                    {{-- <a id="btn-delete" class="dropdown-item" href="javascript:submitForm()"><i class="bx bx-trash me-1"></i> Delete</a> --}}
-                                    <button type="submit" class="btn btn-icon btn-outline-danger" onclick="return confirm('Are you sure you want to delete this expense?')">
-                                      <span class="tf-icons bx bx-trash"></span>
-                                    </button>
-                                {!! Form::close() !!}
-                              @endcan
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                                    {!! Form::open([
+                                        'method' => 'DELETE',
+                                        'route' => ['roles.destroy', withLang(['role' => $role->id])],
+                                        'class' => 'd-inline'
+                                    ]) !!}
+
+                                        <button type="submit"
+                                                class="btn btn-icon btn-outline-danger"
+                                                onclick="return confirm('Are you sure you want to delete this role?')">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+
+                                    {!! Form::close() !!}
+                                @endcan
+
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
+</div>
     <!--/ List Role Table -->
 </div>
 <!-- / Content -->

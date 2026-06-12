@@ -13,7 +13,7 @@
                 @endcan
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productSearchModal">
                   <i class='bx bx-search' ></i>
-                </button>
+                </button> 
             </div>
         </div>
     </div>
@@ -30,9 +30,9 @@
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
                       <th>{{__('order.sale_date')}}</th>
-                      @can(['product-list'],['product-edit'], ['product-delete'], ['order-creat'])
+                      @canany(['product-list', 'product-edit', 'product-delete', 'order-create'])
                       <th>Actions</th>
-                      @endcan
+                      @endcanany
                   </tr>
               </thead>
               <tbody>
@@ -43,7 +43,6 @@
                           <td>{{ setToStringDolla($order->total_amount) ?? ''}}</td>
                           <td>{!! $order->payment_status_badges ?? ''!!}</td>
                           <td>{!! $order->payment_type_badges ?? '' !!}</td>
-                          <td>{!! $order->employee_name ?? '' !!}</td>
                           <td>{!! '<span class="badge bg-label-info">'.setToStringDateFormat($order->order_date).'</span>'!!}</td>
                           <td>
                               @can('order-list')
@@ -65,7 +64,6 @@
                         <th colspan="8" class="p-5 text-center">{{ __('common.lbl_no_data') }}</th>
                       </tr>
                   @endforelse
-
               </tbody>
               <tfoot class="table-border-bottom-0">
                   <tr>
@@ -75,10 +73,9 @@
                       <th>{{__('order.payment_status')}}</th>
                       <th>{{__('order.payment_type')}}</th>
                       <th>{{__('order.sale_date')}}</th>
-                      <th>{{__('order.image')}}</th>
-                      @can(['product-list'],['product-edit'], ['product-delete'], ['order-creat'])
-                       <th>Actions</th>
-                      @endcan
+                      @canany(['product-list', 'product-edit', 'product-delete', 'order-create'])
+                      <th>Actions</th>
+                      @endcanany
                   </tr>
               </tfoot>
           </table>
@@ -150,7 +147,6 @@
                     url: '/en/series/brand/' + brandID,
                     dataType: 'json',
                     success: function(data) {
-                        // Clear and populate select2 with new data
                         var series = $('#series');
                         series.empty();
                         series.append('<option>Select an option</option>');
@@ -162,7 +158,6 @@
                     }
                 });
             } else {
-                // Reset select2 when nothing is selected in select1
                 $('#series').empty().append('<option value="">Select an option</option>');
                 $('#series').prop("disabled", true);
             }

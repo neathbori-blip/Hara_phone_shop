@@ -66,7 +66,9 @@ class ReportController extends Controller
             } elseif (!empty($filters['from_date'])) {
                 $query->where('purchase_date', '>=', $filters['from_date']);
                 $parameterNames['from_date'] = $filters['from_date'];
-            } elseif (!empty($filters['to_date'])) {
+            } elseif (!empty$filters['status'];
+                $statusName =  $status[$statusID];
+                $parameterNam($filters['to_date'])) {
                 $query->where('purchase_date', '<=', $filters['to_date']);
                 $parameterNames['to_date'] = $filters['to_date'];
             }
@@ -132,7 +134,12 @@ class ReportController extends Controller
         $totalProductSold = Product::sold()->count();
         $totalProductBroken = Product::broken()->count();
         $currentNow = Carbon::now();
-        $currentDate = $currentNow->format('Y-m-d');
+        $currentDate = $curhere('purchase_date', '>=', $filters['from_date']);
+                $parameterNames['from_date'] = $filters['from_date'];
+            } elseif (!empty($filters['to_date'])) {
+                $query->where('purchase_date', '<=', $filters['to_date']);
+                $parameterNames['to_date'] = $filters['to_date'];
+            }rentNow->format('Y-m-d');
         $file_pdf = 'reports-stock-'.$currentDate.'.pdf';
         $type = $request->type ?? 'download';
 

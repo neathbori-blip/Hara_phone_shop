@@ -1,70 +1,136 @@
 @extends('layouts.app')
-@push('styles')
-@endpush
 
 @section('content')
-<!-- Content -->
 <div class="container-fluid flex-grow-1 container-p-y">
+
+    <a class="btn btn-outline-secondary mb-3"
+       href="{{ route('roles.index', withLang()) }}">
+        <i class='bx bxs-chevrons-left'></i>&nbsp; Back
+    </a>
+
     <div class="row">
         <div class="col-lg-12 mb-3">
-            <div class="pull-right">
-                <a class="btn btn-outline-secondary" href="{{ route('roles.index', withLang()) }}"><i class='bx bxs-chevrons-left' ></i>&nbsp;  Back</a>
-            </div>
-        </div>
-        <div class="col-xl">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Edit Role</h5>
-                </div>
-                <div class="card-body">
-                    {!! Form::model($role, ['method' => 'PATCH','route' => ['roles.update', withLang(['role' => $role->id])]]) !!}
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 mb-3">
-                                <div class="form-group">
-                                    <label class="form-label" for="basic-default-fullname">Name</label>
-                                    <input id="name" type="text" name="name"  class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $role->name) }}" placeholder="Enter your role" required autocomplete="name" autofocus>
-                                    @error('name')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-sm-12 col-md-12 mb-3">
-                                <div class="form-group">
-                                    <label class="form-label" for="basic-default-fullname">Permission</label>
-                                    <br/>
-                                    @foreach($permission as $value)
-                                        <input class="form-check-input @error('permission') is-invalid @enderror" type="checkbox" name="permission[]" id="permission-{{ $value->id }}" value="{{ $value->id }}"
-                                            {{ in_array($value->id, old('permission', $rolePermissions)) ? 'checked' : '' }}>
-                                        <label for="permission-{{ $value->id }}">{{ $value->name }}</label>
-                                        <br/>
-                                    @endforeach
-                                    @error('permission')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                                <button type="submit" class="btn btn-primary">
-                                    Submit
-                                </button>
-                            </div>
+
+            <div class="col-xl">
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h5>Edit Role</h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        {!! Form::model($role, [
+                            'method' => 'PATCH',
+                            'route' => ['roles.update', withLang(['role' => $role->id])]
+                        ]) !!}
+
+                        {{-- Role Name --}}
+                        <div class="mb-3">
+                            <label>Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                class="form-control"
+                                value="{{ old('name', $role->name) }}"
+                                placeholder="Enter role name"
+                                required
+                            >
+
+                            @error('name')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
-                    {!! Form::close() !!}
+
+                        {{-- Permissions --}}
+                        <div class="mb-3">
+                            <label>Permission</label>
+
+                            @error('permission')
+                                <span class="text-danger d-block">
+                                    {{ $message }}
+                                </span>
+                            @enderror
+
+                            <br>
+
+                            @foreach($groupedPermissions as $group => $permissions)
+                                <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+
+                                    {{-- Parent Checkbox --}}
+                                    <input
+                                        type="checkbox"
+                                        id="group-{{ $group }}"
+                                        onchange="selectAll('{{ $group }}', this)"
+                                    >
+
+                                    <label for="group-{{ $group }}">
+                                        <b>{{ ucfirst($group) }}</b>
+                                    </label>
+
+                                    <br>
+
+                                    {{-- Child Permissions --}}
+                                    <div style="margin-left: 20px;">
+                                        @foreach($permissions as $value)
+
+                                            <input
+                                                type="checkbox"
+                                                class="child {{ $group }}"
+                                                name="permission[]"
+                                                id="permission-{{ $value->id }}"
+                                                value="{{ $value->id }}"
+                                                {{ in_array($value->id, old('permission', $rolePermissions)) ? 'checked' : '' }}
+                                            >
+
+                                            <label for="permission-{{ $value->id }}">
+                                                {{ $value->name }}
+                                            </label>
+
+                                            <br>
+
+                                        @endforeach
+                                    </div>
+
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">
+                                Update
+                            </button>
+                        </div>
+
+                        {!! Form::close() !!}
+
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
-<!-- / Content -->
 @endsection
+
 @push('script')
-    <script>
-        function submitForm(){
-            $('.submit-delete').click();
-        }
-    </script>
+<script>
+    function selectAll(group, parent) {
+        document.querySelectorAll('.' + group).forEach(function(child) {
+            child.checked = parent.checked;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        @foreach($groupedPermissions as $group => $permissions)
+            let children{{ $loop->index }} = document.querySelectorAll('.{{ $group }}');
+            let parent{{ $loop->index }} = document.getElementById('group-{{ $group }}');
+
+            parent{{ $loop->index }}.checked =
+                [...children{{ $loop->index }}].every(cb => cb.checked);
+        @endforeach
+
+    });
+</script>
 @endpush
