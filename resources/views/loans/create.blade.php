@@ -75,7 +75,7 @@
                             <div class="mb-3 col-md-6">
                                 <label class="form-label" for="interest">{{__('loan.interest')}}</label>
                                 <div class="input-group input-group-merge">
-                                  <input class="form-control @error('interest') is-invalid @enderror" type="text" value="{{ old('interest', $company->interest) }}" id="interest" name="interest"/>
+                                  <input class="form-control @error('interest') is-invalid @enderror" type="text" value="{{ old('interest', 3) }}"" id="interest" name="interest"/>
                                   <span class="input-group-text">%</span>
                                   @error('interest')
                                       <span class="invalid-feedback" role="alert">

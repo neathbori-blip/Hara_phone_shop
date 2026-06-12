@@ -121,9 +121,11 @@ class Loan extends Model
     }
 
     public function scopeLatePayment($query)
-    {
-        return $query->approved()->where('next_payment_date', '<', Carbon::now())->where('remain', '>', 0);
-    }
+{
+    return $query->whereIn('status', [self::STATUS_1, self::STATUS_2])
+                 ->where('next_payment_date', '<', Carbon::now())
+                 ->where('remain', '>', 0);
+}
 
     public function isApproved(){
       return $this->status == self::STATUS_2;

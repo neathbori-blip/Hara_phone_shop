@@ -54,17 +54,15 @@ class LoanController extends Controller
         return view('loans.index', compact('loans', 'customers', 'parameterNames'));
     }
 
-    public function create()
-    {
-      $currentNow = Carbon::now();
-      $currentDate = $currentNow->format('d/m/Y');
-      $customers = Customer::loanable()->get();
-      $availableProducts = Product::available()->get();
-      $statusOptions = Loan::STATUS;
-      $defaultNote = Loan::latest()->first()->id ?? 0;
-
-      return view('loans.create', compact('currentDate', 'customers', 'availableProducts', 'statusOptions', 'defaultNote'));
-    }
+   public function create()
+{
+    $currentDate = Carbon::now()->format('Y-m-d');
+    $customers = Customer::get();
+    $availableProducts = Product::available()->get();
+    $statusOptions = Loan::STATUS;
+    $defaultNote = Loan::latest()->first()->id ?? 0;
+    return view('loans.create', compact('currentDate', 'customers', 'availableProducts', 'statusOptions', 'defaultNote'));
+}
 
     public function store(Request $request)
     {

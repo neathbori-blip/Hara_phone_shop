@@ -54,7 +54,7 @@
                                 <td>
                                     <!-- Add edit and delete buttons/links here -->
                                     @can('loan-list')
-                                      @if($loan->status == 2 || $loan->status == 3)
+                                      @if($loan->status == 1 || $loan->status == 2 || $loan->status == 3)
                                           <a href="{{ route('loans.invoice', withLang(['loan' => $loan->id])) }}" class="btn btn-icon btn-outline-secondary">
                                             <i class="fa-solid fa-receipt"></i>
                                           </a>
@@ -64,7 +64,7 @@
                                       @endif
                                     @endcan
                                     @can('loan-create')
-                                      @if($loan->status == 2 || $loan->status == 3)
+                                      @if($loan->status == 1 || $loan->status == 2 || $loan->status == 3)
                                           <a href="{{ route('loans.agreement', withLang(['loan' => $loan->id])) }}" class="btn btn-icon btn-outline-secondary" target="_blank">
                                             <i class="fa-solid fa-handshake"></i>
                                           </a>

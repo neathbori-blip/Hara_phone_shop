@@ -8,16 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('series', function (Blueprint $table) {
-            $table->unsignedBigInteger('brand_id')->nullable()->change();
+        Schema::table('loans', function (Blueprint $table) {
+            $table->decimal('phone_profit', 15, 2)->default(0);
         });
     }
 
     public function down(): void
     {
-        Schema::table('series', function (Blueprint $table) {
-            $table->unsignedBigInteger('brand_id')->nullable(false)->change();
+        Schema::table('loans', function (Blueprint $table) {
+            $table->dropColumn('phone_profit');
         });
     }
 };
-
