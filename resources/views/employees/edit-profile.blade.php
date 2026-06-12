@@ -13,13 +13,13 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-user me-1"></i> Account</a>
                     </li>
-                    @can('user-password-edit')
-                    <li class="nav-item">
-                      <a class="nav-link" href="{{ route('users.edit.password', withLang(['id' => $user->id]))}}">
-                          <i class="bx bxs-keyboard me-1"></i> Password
-                      </a>
-                  </li>
-                  @endcan
+                   @can('user-profile-password-edit')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('users.edit.profile.password', withLang())}}">
+                                <i class="bx bxs-keyboard me-1"></i> Password
+                            </a>
+                        </li>
+                    @endcan
                 </ul>
                 <form id="formAccountSettings" method="POST" action="{{ route('users.update', withLang(['id' => $user->id])) }}" enctype="multipart/form-data">
                   @csrf

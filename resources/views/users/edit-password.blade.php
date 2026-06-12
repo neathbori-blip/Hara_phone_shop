@@ -46,7 +46,7 @@
                             <div class="mb-3 form-password-toggle col-6">
                                 <label for="current-password" class="form-label">Current Password</label>
                                 <div class="input-group input-group-merge">
-                                    <input id="current-password" type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password" required autocomplete="current-password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="current-password">
+                                    <input id="current-password"git  type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password" required autocomplete="current-password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="current-password">
                                     @error('current_password')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
