@@ -76,7 +76,7 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', Auth::id())->delete();
         $user->assignRole($request->position);
 
-        return redirect()->route('users.edit.profile', withLang());
+        return redirect()->route('users.index', withLang());
     }
 
     public function editPassword()
@@ -96,7 +96,7 @@ class UserController extends Controller
         if (Hash::check($request->current_password, $user->password)) {
             $user->password = Hash::make($request->new_password);
             $user->save();
-            return redirect()->route('users.edit.password', withLang(['id' => $user->id]))->with('success', 'Password updated successfully');
+            return redirect()->route('users.index', withLang(['id' => $user->id]))->with('success', 'Password updated successfully');
         } else {
             return redirect()->route('users.edit.password', withLang(['id' => $user->id]))->with('error', 'Current password is incorrect');
         }

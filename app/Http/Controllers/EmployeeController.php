@@ -165,7 +165,7 @@ class EmployeeController extends Controller
     $user->save();
 
     return redirect()
-        ->route('users.edit.password', withLang(['id' => $user->id]))
+        ->route('users.index', withLang(['id' => $user->id]))
         ->with('success', 'Password updated successfully');
     }
 }
