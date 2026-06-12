@@ -47,8 +47,13 @@ class RoleController extends Controller
      */
     public function create(): View
     {
-        $permission = Permission::get();
-        return view('roles.create',compact('permission'));
+    $permission = Permission::get();
+
+    $groupedPermissions = $permission->groupBy(function($item) {
+        return explode('-', $item->name)[0];
+    });
+
+    return view('roles.create', compact('groupedPermissions'));
     }
 
     /**
@@ -92,16 +97,27 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($lang, $id): View
-    {
-        $role = Role::findOrfail($id);
-        $permission = Permission::get();
-        $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id",$id)
-            ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
-            ->all();
+    public function edit($lang, $id)
+{
+    $role = Role::findOrFail($id);
 
-        return view('roles.edit',compact('role','permission','rolePermissions'));
-    }
+    $permissions = Permission::all();
+
+    $groupedPermissions = $permissions->groupBy(function ($permission) {
+        return explode('-', $permission->name)[0];
+    });
+
+    $rolePermissions = DB::table('role_has_permissions')
+        ->where('role_id', $role->id)
+        ->pluck('permission_id')
+        ->toArray();
+
+    return view('roles.edit', compact(
+        'role',
+        'groupedPermissions',
+        'rolePermissions'
+    ));
+}
 
     /**
      * Update the specified resource in storage.
@@ -132,10 +148,9 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(string $lang, string $id): RedirectResponse
     {
-        DB::table("roles")->where('id',$id)->delete();
-        return redirect()->route('roles.index', withLang())
-                        ->with('success','Role deleted successfully');
+        DB::table("roles")->where('id', $id)->delete();
+        return redirect()->route('roles.index', withLang())->with('success', 'Role deleted successfully');
     }
 }
