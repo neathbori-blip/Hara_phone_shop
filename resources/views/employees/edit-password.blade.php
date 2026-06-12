@@ -10,16 +10,18 @@
         <div class="row">
             <div class="col-md-12">
                 <ul class="nav nav-pills flex-column flex-md-row mb-3">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('users.edit', withLang(['id' => $user->id])) }}"><i class="bx bx-user me-1"></i> Account</a>
-                    </li>
-                    @can('user-password-edit')
-                    <li class="nav-item">
-                      <a class="nav-link active" href="javascript:void(0);">
-                          <i class="bx bxs-keyboard me-1"></i> Password
-                      </a>
-                  </li>
-                  @endcan
+                    @can('user-profile-edit')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('users.edit.profile', withLang()) }}"><i class="bx bx-user me-1"></i> Account</a>
+                        </li>
+                        @can('user-profile-password-edit')
+                        <li class="nav-item">
+                            <a class="nav-link active" href="javascript:void(0);">
+                                <i class="bx bxs-keyboard me-1"></i> Password
+                            </a>
+                        </li>
+                        @endcan
+                    @endcan
                 </ul>
                 <form id="formAccountSettings" method="POST" action="{{ route('users.update.password', withLang(['id' => $user->id]))}}" enctype="multipart/form-data">
                     @csrf
@@ -41,6 +43,22 @@
                         </div>
                         <hr class="my-0" />
                         <div class="card-body">
+                            <div class="mb-3 form-password-toggle col-6">
+                                <label for="current-password" class="form-label">Current Password</label>
+                                <div class="input-group input-group-merge">
+                                    <input id="current-password"
+                                             type="password" 
+                                             class="form-control @error('current_password') is-invalid @enderror" 
+                                             name="current_password" required autocomplete="current-password" 
+                                             placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="current-password">
+                                    @error('current_password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                    <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                </div>
+                            </div>
                             <div class="mb-3 form-password-toggle col-6">
                                   <label for="new-password" class="form-label">New Password</label>
                                   <div class="input-group input-group-merge">

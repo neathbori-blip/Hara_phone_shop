@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
@@ -147,12 +148,24 @@ class EmployeeController extends Controller
     public function updatePassword(Request $request, string $lang, string $id)  
     {
     $request->validate([
-        'new_password' => 'required|confirmed',
+        'current_password' => 'required',
+        'new_password' => 'required|min:8|confirmed',
     ]);
-    $user = User::findOrFail($id);
+
+    $user = User::findOrfail(Auth::id());
+
+    // Explicitly return early if current password is wrong
+    if (!Hash::check($request->current_password, $user->password)) {
+        return redirect()
+            ->route('users.edit.password', withLang(['id' => $user->id]))
+            ->withErrors(['current_password' => 'Current password is incorrect']);
+    }
+
     $user->password = Hash::make($request->new_password);
     $user->save();
-    return redirect()->route('users.index', withLang(['id' => $user->id]))
+
+    return redirect()
+        ->route('users.edit.password', withLang(['id' => $user->id]))
         ->with('success', 'Password updated successfully');
     }
 }
